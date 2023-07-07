@@ -2,7 +2,9 @@ package com.ecommerce.microcommerce.facture.service;
 
 import com.ecommerce.microcommerce.facture.exception.FactureException;
 import com.ecommerce.microcommerce.facture.model.Facture;
+import com.ecommerce.microcommerce.facture.model.LigneFacture;
 import com.ecommerce.microcommerce.facture.repository.FactureRepository;
+import com.ecommerce.microcommerce.produit.model.Produit;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -43,5 +45,53 @@ public class FactureService {
     public void deleteFacture(Long id) {
         factureRepository.deleteById(id);
     }
+
+    public void ajouterProduitAFacture(Facture facture, Produit produit, int quantite) {
+        Optional<LigneFacture> optionalLigneFacture = facture.getLignesFacture().stream()
+                .filter(ligneFacture -> ligneFacture.getProduit().equals(produit))
+                .findFirst();
+
+        if (optionalLigneFacture.isPresent()) {
+            LigneFacture ligneFactureExistante = optionalLigneFacture.get();
+            ligneFactureExistante.setQuantite(ligneFactureExistante.getQuantite() + quantite);
+        } else {
+            LigneFacture nouvelleLigne = new LigneFacture();
+            nouvelleLigne.setFacture(facture);
+            nouvelleLigne.setProduit(produit);
+            nouvelleLigne.setQuantite(quantite);
+
+            facture.getLignesFacture().add(nouvelleLigne);
+        }
+
+        facture.setMontant(calculateMontantTotal(facture));
+    }
+
+    private double calculateMontantTotal(Facture facture) {
+        double montantTotal = 0.0;
+
+        for (LigneFacture ligneFacture : facture.getLignesFacture()) {
+            double sousTotal = ligneFacture.getProduit().getPrix() * ligneFacture.getQuantite();
+            montantTotal += sousTotal;
+        }
+
+        return montantTotal;
+    }
+
+    public void supprimerProduitDeFacture(Facture facture, Produit produit) {
+        Optional<LigneFacture> ligneFactureOpt = facture.getLignesFacture().stream()
+                .filter(ligneFacture -> ligneFacture.getProduit().equals(produit))
+                .findFirst();
+
+        if (ligneFactureOpt.isPresent()) {
+            LigneFacture ligneFacture = ligneFactureOpt.get();
+            facture.getLignesFacture().remove(ligneFacture);
+        }
+
+        facture.setMontant(calculateMontantTotal(facture));
+        factureRepository.save(facture);
+    }
+
+
+
 
 }

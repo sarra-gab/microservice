@@ -1,7 +1,9 @@
 package com.ecommerce.microcommerce.facture.model;
 
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 
 @Entity
@@ -18,6 +20,17 @@ public class Facture {
     // Constructeurs, getters et setters
 
     public Facture() {
+    }
+
+    @OneToMany(mappedBy = "facture", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<LigneFacture> lignesFacture = new ArrayList<>();
+
+    public List<LigneFacture> getLignesFacture() {
+        return lignesFacture;
+    }
+
+    public void setLignesFacture(List<LigneFacture> lignesFacture) {
+        this.lignesFacture = lignesFacture;
     }
 
     public Facture(Date date, String description, double montant) {

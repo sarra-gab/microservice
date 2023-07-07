@@ -4,8 +4,8 @@ import com.ecommerce.microcommerce.facture.exception.FactureException;
 import com.ecommerce.microcommerce.facture.model.Facture;
 import com.ecommerce.microcommerce.facture.repository.FactureRepository;
 import com.ecommerce.microcommerce.facture.service.FactureService;
-import com.ecommerce.microcommerce.produit.exception.ProduitException;
 import com.ecommerce.microcommerce.produit.model.Produit;
+import com.ecommerce.microcommerce.produit.service.ProduitService;
 import com.ecommerce.microcommerce.produit.repository.ProduitRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -22,6 +22,8 @@ public class FactureController {
     private FactureService factureService;
     @Autowired
     private FactureRepository factureRepository;
+    @Autowired
+    private ProduitService produitService;
     @Autowired
     private ProduitRepository produitRepository;
     @GetMapping
@@ -68,16 +70,29 @@ public class FactureController {
         }
     }
     @PostMapping("/{factureId}/produits/{produitId}")
-    public Facture ajouterProduit(Long factureId, Long produitId, int quantite) {
-        Facture facture = factureRepository.findById(factureId)
-                .orElseThrow(() -> new FactureException("Facture introuvable avec l'ID : " + factureId));
+    public ResponseEntity<Facture> ajouterProduit(@PathVariable Long factureId, @PathVariable Long produitId, @RequestParam int quantite) {
+        Facture facture = factureService.getFactureById(factureId);
+        Produit produit = produitService.getProduitById(produitId);
 
-        Produit produit = produitRepository.findById(produitId)
-                .orElseThrow(() -> new ProduitException("Produit introuvable avec l'ID : " + produitId));
+        if (facture != null && produit != null) {
+            factureService.ajouterProduitAFacture(facture, produit, quantite);
+            return ResponseEntity.ok(facture);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
 
-        // Ajoutez votre logique pour ajouter le produit à la facture ici
+    @DeleteMapping("/{factureId}/produits/{produitId}")
+    public ResponseEntity<Facture> supprimerProduitDeFacture(@PathVariable Long factureId, @PathVariable Long produitId) {
+        Facture facture = factureService.getFactureById(factureId);
+        Produit produit = produitService.getProduitById(produitId);
 
-        return facture;
+        if (facture != null && produit != null) {
+            factureService.supprimerProduitDeFacture(facture, produit);
+            return ResponseEntity.ok(facture);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
     }
 
     public FactureService getFactureService() {
