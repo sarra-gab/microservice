@@ -11,4 +11,11 @@ import java.util.Optional;
 @Repository
 public interface FactureRepository extends JpaRepository<Facture, Long> {
 
+    Optional<Facture> findById(Long id);
+
+    Facture save(Facture facture);
+
+    void delete(Facture facture);
+
+    void deleteById(Long id);
 }

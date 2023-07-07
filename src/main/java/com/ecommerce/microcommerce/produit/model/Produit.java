@@ -1,5 +1,11 @@
 package com.ecommerce.microcommerce.produit.model;
 
+
+import javax.persistence.Entity;
+import javax.persistence.Table;
+
+@Entity
+@Table(name = "produit")
 public class Produit {
     private int id;
     private String type;

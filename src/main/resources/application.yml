@@ -1,0 +1,7 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/micro
+    username: sarra
+    password: sarra
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect

@@ -43,4 +43,5 @@ public class FactureService {
     public void deleteFacture(Long id) {
         factureRepository.deleteById(id);
     }
+
 }
